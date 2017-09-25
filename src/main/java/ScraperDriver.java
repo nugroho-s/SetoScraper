@@ -78,7 +78,7 @@ public class ScraperDriver {
 
             // execute insert SQL statement
             crunchifyPrepareStat.executeUpdate();
-            log(quote + " added successfully");
+            logger.info(quote + " added successfully");
         } catch (SQLException e) {
             logger.warn(e.getMessage());
         }
