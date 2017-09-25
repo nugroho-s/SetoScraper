@@ -1,3 +1,6 @@
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
@@ -17,7 +20,10 @@ public class ScraperDriver {
     static DBConfig dbConfig;
     static String url;
 
+    static final Logger logger = Logger.getLogger(ScraperDriver.class);
+
     public static void main(String[] args){
+        PropertyConfigurator.configure("log4j.properties");
         Validate.isTrue(args.length >= 1, "usage: supply url to fetch");
         Validate.isTrue(args.length == 2, "usage: supply how many time to fetch");
         url = args[0];
@@ -34,17 +40,16 @@ public class ScraperDriver {
     }
 
     private static void print(String msg, Object... args) {
-        System.out.println(String.format(msg, args));
+        logger.info(String.format(msg, args));
     }
 
     private static void makeJDBCConnection() {
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            log("Congrats - Seems your MySQL JDBC Driver Registered!");
         } catch (ClassNotFoundException e) {
-            log("Sorry, couldn't found JDBC driver. Make sure you have added JDBC Maven Dependency Correctly");
-            e.printStackTrace();
+            logger.error("Sorry, couldn't found JDBC driver. Make sure you have added JDBC Maven Dependency Correctly");
+            logger.warn(e.getMessage());
             return;
         }
 
@@ -52,14 +57,12 @@ public class ScraperDriver {
             // DriverManager: The basic service for managing a set of JDBC drivers.
             crunchifyConn = DriverManager.getConnection("jdbc:mysql://"+dbConfig.host+":"+dbConfig.port+"/"+dbConfig.db,
                     dbConfig.user, dbConfig.password);
-            if (crunchifyConn != null) {
-                log("Connection Successful! Enjoy. Now it's time to push data");
-            } else {
-                log("Failed to make connection!");
+            if (crunchifyConn == null) {
+                logger.error("Failed to make connection!");
             }
         } catch (SQLException e) {
-            log("MySQL Connection Failed!");
-            e.printStackTrace();
+            logger.error("MySQL Connection Failed!");
+            logger.error(e.getMessage());
             return;
         }
 
@@ -76,10 +79,8 @@ public class ScraperDriver {
             // execute insert SQL statement
             crunchifyPrepareStat.executeUpdate();
             log(quote + " added successfully");
-        } catch (
-
-                SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            logger.warn(e.getMessage());
         }
     }
 
@@ -94,7 +95,7 @@ public class ScraperDriver {
                     .header("Upgrade-Insecure-Requests","1")
                     .header("Accept-Encoding", "gzip,deflate,sdch").get();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.warn(e.getMessage());
         }
 
         Element content = doc.getElementsByClass("starter-template").first();
