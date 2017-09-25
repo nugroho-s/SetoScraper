@@ -34,7 +34,7 @@ public class ScraperDriver {
         dbConfig = DBConfig.Scrape;
         makeJDBCConnection();
 
-        for(int i=0;i<limit;i++) {
+        for(int i=0;((limit==-1)?true:(i<limit));i++) {
             getandAddQuote();
         }
     }
@@ -99,8 +99,12 @@ public class ScraperDriver {
         }
 
         Element content = doc.getElementsByClass("starter-template").first();
-        String quote = content.getElementsByTag("h1").text();
-        print(quote);
-        addDataToDB(quote);
+        if(content!=null){
+            String quote = content.getElementsByTag("h1").text();
+            print(quote);
+            addDataToDB(quote);
+        } else {
+            logger.error("null content");
+        }
     }
 }
