@@ -1,4 +1,3 @@
-import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.jsoup.Jsoup;
@@ -11,8 +10,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import static com.sun.activation.registries.LogSupport.log;
 
 public class ScraperDriver {
     static Connection crunchifyConn = null;
